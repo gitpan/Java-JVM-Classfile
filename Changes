@@ -1,5 +1,16 @@
 Revision history for Perl module Java::JVM::Classfile
 
+0.19 Sun May 19 18:33:15 BST 2002
+	- new perl.t test which generates Perl code from the example
+          class files, runs them, and compares them with the expected
+          outcome
+        - more patches by Amit Guha: method to reads floats from the
+          IEEE format and 2-word operations ([dl]load, [dl]store) work
+          by simulating their effect on stacks i.e. loads are followed
+          by a push @stack, 0 and stores are preceded by a pop @stack.
+          Complicates the code but this is the only way to make it 
+          work in all cases.   
+
 0.18 Mon May 13 21:54:22 BST 2002
 	- new Ackermann example / tests
 	- Java::JVM::Classfile::Perl can now cope with ifne op and can

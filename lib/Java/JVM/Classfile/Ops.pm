@@ -179,7 +179,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 0,
          produced => 1,
-             type => '',
+             type => 'twobytes',
   },
   20 => {
              name => 'ldc2_w',
@@ -187,7 +187,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 0,
          produced => 2,
-             type => '',
+             type => 'twobytes',
   },
   21 => {
              name => 'iload',

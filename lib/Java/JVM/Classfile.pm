@@ -1,3 +1,5 @@
+
+# ConstantPoolEntry
 package Java::JVM::Classfile::ConstantPoolEntry;
 use Class::Struct;
 use overload '""' => \&as_text;
@@ -12,6 +14,7 @@ sub value {
   return $self->values->[0];
 }
 
+# Method
 package Java::JVM::Classfile::Method;
 use Class::Struct;
 use overload '""' => \&as_text;
@@ -29,6 +32,7 @@ sub as_text {
   return $result;
 }
 
+# Attribute
 package Java::JVM::Classfile::Attribute;
 use Class::Struct;
 use overload '""' => \&as_text;
@@ -40,6 +44,7 @@ sub as_text {
   return $name . ' (' . $self->value . ')';
 }
 
+# Attribute::Code
 package Java::JVM::Classfile::Attribute::Code;
 use Class::Struct;
 use overload '""' => \&as_text;
@@ -55,6 +60,7 @@ sub as_text {
   $return .= ", locals(" . $self->max_locals . ")";
 }
 
+# Struct
 package Java::JVM::Classfile::Struct;
 use Class::Struct;
 use overload '""' => \&as_text;
@@ -85,6 +91,7 @@ sub as_text {
   return $result;
 }
 
+# Instruction
 package Java::JVM::Classfile::Instruction;
 use Class::Struct;
 struct(label => '$',
@@ -106,11 +113,14 @@ sub as_text {
   return $output;
 }
 
+# LineNumber
 package Java::JVM::Classfile::LineNumber;
 use Class::Struct;
 struct(offset => '$',
        line => '$');
 
+
+# Classfile
 package Java::JVM::Classfile;
 
 use strict;
@@ -170,7 +180,7 @@ my @ACCESS = (
     "public", "private", "protected", "static", "final", "synchronized",
     "volatile", "transient", "native", "interface", "abstract");
 
-$VERSION = '0.18';
+$VERSION = '0.19';
 
 use constant T_BOOLEAN => 4;
 use constant T_CHAR    => 5;
@@ -257,7 +267,7 @@ sub read_constant_pool {
   my @constant_pool;
 
 #  print "Constant pool entries: $count \n";
-  foreach my $index (1 .. $count - 1) {
+  for(my $index=1; $index<$count; $index++) {
 #    print "constant pool $index: ";
     my $type = $self->read_u1;
     if ($type == Methodref) {
@@ -272,6 +282,12 @@ sub read_constant_pool {
       $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
         'fieldref', values => [$class_index, $name_and_type_index]);
 #      print "fieldref $class_index, $name_and_type_index\n";
+    } elsif ($type == InterfaceMethodref) {
+      my $class_index = $self->read_u2;
+      my $name_and_type_index = $self->read_u2;
+      $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
+        'interfacemethodref', values => [$class_index, $name_and_type_index]);
+#      print "interfacemethodref $class_index, $name_and_type_index\n";
     } elsif ($type == Class) {
       my $name_index = $self->read_u2;
       $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
@@ -294,12 +310,77 @@ sub read_constant_pool {
       my $string_index = $self->read_u2;
       $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
         'string', values => [$string_index]);
+#      print "String: $string_index\n";
+    } elsif ($type == Integer) {
+      my $bytes = $self->read_u4;
+      $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
+        'integer', values => [$bytes]);
+#      print "Integer: \n";
+    } elsif ($type == Float) {
+      my $bytes = $self->read_u4;
+      my $float = $self->float_value($bytes);
+      $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
+        'float', values => [$float]);
+#      print "Float: \n";
+
+# JVM Specs: All 8-byte constants take up two entries in the constant_pool 
+# table of the class file. If a CONSTANT_Long_info or CONSTANT_Double_info 
+# structure is the item in the constant_pool table at index n, then the next 
+# usable item in the pool is located at index n+2. The constant_pool index 
+# n+1 must be valid but is considered unusable. (In retrospect, making 8-byte 
+# constants take two constant pool entries was a poor choice.)
+
+    } elsif ($type == Long) {
+      my $high_bytes = $self->read_u4;
+      my $low_bytes = $self->read_u4;
+      my $long = $self->long_value($high_bytes, $low_bytes);
+      $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
+              'long', values => [$long]);
+      $constant_pool[++$index] = 0;
+#      print "Long: $long\n";
+    } elsif ($type == Double) {
+      my $high_bytes = $self->read_u4;
+      my $low_bytes = $self->read_u4;
+      my $double = $self->double_value($high_bytes, $low_bytes);
+      $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
+              'double', values => [$double]);
+      $constant_pool[++$index] = 0;
+#      print "Double: $high_bytes, $low_bytes\n";
     } else {
       die "unknown constant type $type in pool!\n";
     }
   }
 
   return \@constant_pool;
+}
+
+# JVM long format is ((long) high_bytes << 32) + low_bytes 
+sub long_value {
+
+    my $self = shift;
+    my ($high_bytes, $low_bytes) = @_;
+    return ($high_bytes << 32) + $low_bytes;
+}
+
+# JVM floats are in IEEE 754 floating-point single format
+sub float_value {
+
+    my $self = shift;
+    my ($bits) = @_;
+
+    my $s = (($bits >> 31) == 0) ? 1 : -1;
+    my $e = (($bits >> 23) & 0xff);
+    my $m = ($e == 0) ? ($bits & 0x7fffff) << 1 : ($bits & 0x7fffff) | 0x800000;
+
+    return $s*$m*(2**($e-150));
+}
+
+# JVM doubles are in IEEE 754 floating-point double format
+sub double_value {
+
+    my $self = shift;
+    my ($high_bytes, $low_bytes) = @_;
+    return 3.14;
 }
 
 sub read_class_info {
@@ -576,6 +657,8 @@ sub get_index {
     push @operands, $constant_pool->[$constant->value]->value;
   } elsif ($type eq 'string') {
     push @operands, $constant_pool->[$constant->value]->value;
+  } elsif ($type eq 'float') {
+    push @operands, $constant->value;
   } else {
     die "unknown index type $type!\n";
   }

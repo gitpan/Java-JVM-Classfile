@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION @ISA);
 use Java::JVM::Classfile;
 
-$VERSION = '0.15';
+$VERSION = '0.16';
 
 sub new {
   my $class = shift;
@@ -21,6 +21,7 @@ sub as_perl {
   my $self = shift;
   my $c = $self->{_class};
   my $code;
+  my @cpool = @{$c->constant_pool};
 
   $code .= q|
 package java::io::PrintStream;
@@ -140,49 +141,67 @@ sub toString {
 	  my $arg = $args[0];
 	  $code .= "push \@stack, '$arg';\n";
 	} elsif ($op eq 'ldc2_w') {
-          my $arg = $args[1];
-          my @cpool = @{$c->constant_pool};
+	  my $arg = $args[0] << 8 | $args[1]; # See JVM specs
 	  $code .= "push \@stack, ".$cpool[$arg]->values->[0].";\n";
+	  $code .= "push \@stack, 'FAKE VALUE FOR LONG';\n";
 	} elsif ($op eq 'bipush' or $op eq 'sipush') {
 	  my $arg = $args[0];
 	  $code .= "push \@stack, $arg;\n";
 	} elsif ($op eq 'return') {
 	  $code .= "return;\n";
-      	} elsif ($op =~ /^[id]return$/) {
-          $code .= "return pop(\@stack);\n";
-	} elsif ($op =~ /^iconst_(\d)/) {
+	} elsif ($op =~ /^[fldai]return$/) {
+	  $code .= "return pop(\@stack);\n";
+	} elsif ($op =~ /^[li]const_(\d)/) {
 	  $code .= "push \@stack, $1;\n";
-        } elsif ($op =~ /^[dai]store_(\d)/) {
-          $code .= "\$locals[$1] = pop \@stack;\n";
-	} elsif ($op =~ /^[dai]store/) {
+	} elsif ($op =~ /^[fai]store_(\d)/) {
+	  $code .= "\$locals[$1] = pop \@stack;\n";
+	} elsif ($op =~ /^[ld]store_(\d)/) {
+	  $code .= "pop \@stack;\n";
+	  $code .= "\$locals[$1] = pop \@stack;\n";
+	} elsif ($op =~ /^[fai]store/) {
 	  my $i = $args[0];
 	  $code .= "\$locals[$i] = pop \@stack;\n";
-	} elsif ($op =~ /[dai]load_(\d)/) {
+	} elsif ($op =~ /^[ld]store/) {
+	  my $i = $args[0];
+	  $code .= "\$locals[$i] = pop \@stack;\n";
+	  $code .= "pop \@stack;\n";
+	} elsif ($op =~ /[fai]load_(\d)/) {
 	  $code .= "push \@stack, \$locals[$1];\n";
-	} elsif ($op =~ /^[dai]load$/) {
+	} elsif ($op =~ /[ld]load_(\d)/) {
+	  $code .= "push \@stack, \$locals[$1];\n";
+	  $code .= "push \@stack, 'FAKE VALUE FOR LONGS';\n";
+	} elsif ($op =~ /^[fai]load$/) {
 	  my $i = $args[0];
 	  $code .= "push \@stack, \$locals[$i];\n";
+	} elsif ($op =~ /^[ld]load$/) {
+	  my $i = $args[0];
+	  $code .= "push \@stack, \$locals[$i];\n";
+	  $code .= "push \@stack, 'FAKE VALUE FOR LONGS';\n";
 	} elsif ($op eq 'goto') {
 	  my $label = $args[0];
 	  $code .= "goto $label;\n";
 	} elsif ($op eq 'dup') {
 	  $code .= "push \@stack, \$stack[-1];\n";
-	} elsif ($op =~ /^[di]add$/) {
+	} elsif ($op =~ /^[fi]add$/) {
 	  $code .= "push \@stack, (pop \@stack) + (pop \@stack);\n";
-	} elsif ($op =~ /^[di]sub/) {
+	} elsif ($op =~ /^[ld]add$/) {
+	  $code .= qq|pop \@stack;
+\$o = pop \@stack;
+pop \@stack;
+\$o += pop \@stack;
+push \@stack, \$o;\n|;
+	} elsif ($op =~ /^[fldi]sub/) {
 	  $code .= "push \@stack, - (pop \@stack) + (pop \@stack);\n";
-	} elsif ($op =~ /^[di]mul/) {
-          $code .= "push \@stack, (pop \@stack) * (pop \@stack);\n";
+	} elsif ($op =~ /^[fldi]mul/) {
+	  $code .= "push \@stack, (pop \@stack) * (pop \@stack);\n";
 	} elsif ($op eq 'aaload') {
 	  $code .= qq|\$o = pop \@stack;
-my \$array = pop \@stack;
-push \@stack, \$array->[\$o];\n|;
+	  my \$array = pop \@stack;
+	  push \@stack, \$array->[\$o];\n|;
 	} elsif ($op eq 'iinc') {
 	  my $i = $args[0];
 	  my $n = $args[1];
 	  $code .= "\$locals[$i] += $n;\n";
-	} elsif ($op eq 'imul') {
-	  $code .= "push \@stack, (pop \@stack) * (pop \@stack);\n";
 	} elsif ($op eq 'if_icmplt') {
 	  my $label = $args[0];
 	  $code .= "goto $label if (pop \@stack) > (pop \@stack);\n";
@@ -209,17 +228,17 @@ sub invokestatic_code {
     my $self = shift;
     my ($class, $method, $signature) = @_;
 
-    my ($code, $incount);
+    my ($code, $incount, $doubles);
     my($in, $out) = $signature =~ /^\((.*?)\)(.*?)$/;
 
     $in =~ s/L[^;]*;/L/g;
-    $incount = () = $in =~ /[DIL]/g;
+    $incount = () = $in =~ /[FIL]/g;
+    $doubles = () = $in =~ /[JD]/g;
+    $incount += 2*$doubles;
     $out = "" if defined($out) && $out eq 'V';
     if ($in) {
-	$code .= qq|
-\@params = splice(\@stack,-$incount);
-\$return = $class->$method(\@params); # $in / $out\n
-|;
+	$code .= qq|\@params = splice(\@stack,-$incount);
+\$return = $class->$method(\@params); # $in / $out\n|;
     } else {
 	$code .= "\$return = $class->$method(); # $in / $out\n";
     }
@@ -233,15 +252,16 @@ sub invokevirtual_code {
     my $self = shift;
     my ($class, $method, $signature) = @_;
 
-    my ($code, $incount);
+    my ($code, $incount, $doubles);
     my($in, $out) = $signature =~ /^\((.*?)\)(.*?)$/;
     $in =~ s/L[^;]*;/L/g;
-    $incount = () = $in =~ /[DIL]/g;
+    $incount = () = $in =~ /[FIL]/g;
+    $doubles = () = $in =~ /[JD]/g;
+    $incount += 2*$doubles;
     $out = "" if defined($out) && $out eq 'V';
 
     if ($in) {
-	$code .= qq|
-\@params = splice(\@stack,-$incount);
+	$code .= qq|\@params = splice(\@stack,-$incount);
 \$p = pop \@stack;
 \$return = \$p->$method(\@params); # $in / $out\n|;
     } else {
