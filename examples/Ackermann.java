@@ -1,9 +1,9 @@
 // $Id: ackermann.java,v 1.5 2001/11/17 17:20:39 doug Exp $
 // http://www.bagley.org/~doug/shootout/
 
-public class ackermann {
+public class Ackermann {
     public static void main(String[] args) {
-	int num = Integer.parseInt(args[0]);
+	int num = 5;
 	System.out.println("Ack(3," + num + "): " + Ack(3, num));
     }
     public static int Ack(int m, int n) {

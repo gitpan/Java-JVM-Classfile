@@ -1,5 +1,12 @@
 Revision history for Perl module Java::JVM::Classfile
 
+0.18 Mon May 13 21:54:22 BST 2002
+	- new Ackermann example / tests
+	- Java::JVM::Classfile::Perl can now cope with ifne op and can
+	  send more than one parameter to a subroutine)
+	- added patches by Amit Guha to make ::Perl support multi-parameter
+          method calls and initial double / float / long functionality
+
 0.17 Tue Apr 16 16:25:43 GMT 2002
 	- support for int type
 	- support for sipush opcode

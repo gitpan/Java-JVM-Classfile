@@ -170,7 +170,7 @@ my @ACCESS = (
     "public", "private", "protected", "static", "final", "synchronized",
     "volatile", "transient", "native", "interface", "abstract");
 
-$VERSION = '0.17';
+$VERSION = '0.18';
 
 use constant T_BOOLEAN => 4;
 use constant T_CHAR    => 5;
