@@ -1,4 +1,6 @@
 Changes
+Bench.class
+Bench.java
 HelloWorld.class
 HelloWorld.java
 MANIFEST
@@ -7,4 +9,5 @@ README
 lib/Java/JVM/Classfile.pm
 lib/Java/JVM/Classfile/Ops.pm
 run.pl
+t/bench.t
 t/simple.t

@@ -27,6 +27,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 0,
+             type => 'noargs',
   },
   1 => {
              name => 'aconst_null',
@@ -34,6 +35,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   2 => {
              name => 'iconst_m1',
@@ -41,6 +43,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   3 => {
              name => 'iconst_0',
@@ -48,6 +51,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   4 => {
              name => 'iconst_1',
@@ -55,6 +59,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   5 => {
              name => 'iconst_2',
@@ -62,6 +67,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   6 => {
              name => 'iconst_3',
@@ -69,6 +75,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   7 => {
              name => 'iconst_4',
@@ -76,6 +83,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   8 => {
              name => 'iconst_5',
@@ -83,6 +91,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   9 => {
              name => 'lconst_0',
@@ -90,6 +99,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   10 => {
              name => 'lconst_1',
@@ -97,6 +107,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   11 => {
              name => 'fconst_0',
@@ -104,6 +115,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   12 => {
              name => 'fconst_1',
@@ -111,6 +123,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   13 => {
              name => 'fconst_2',
@@ -118,6 +131,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   14 => {
              name => 'dconst_0',
@@ -125,6 +139,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   15 => {
              name => 'dconst_1',
@@ -132,6 +147,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   16 => {
              name => 'bipush',
@@ -139,6 +155,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 0,
          produced => 1,
+             type => 'byte',
   },
   17 => {
              name => 'sipush',
@@ -146,6 +163,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 0,
          produced => 1,
+             type => 'int',
   },
   18 => {
              name => 'ldc',
@@ -153,6 +171,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 0,
          produced => 1,
+             type => 'byteindex',
   },
   19 => {
              name => 'ldc_w',
@@ -160,6 +179,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 0,
          produced => 1,
+             type => '',
   },
   20 => {
              name => 'ldc2_w',
@@ -167,6 +187,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 0,
          produced => 2,
+             type => '',
   },
   21 => {
              name => 'iload',
@@ -174,6 +195,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 0,
          produced => 1,
+             type => 'bytevar',
   },
   22 => {
              name => 'lload',
@@ -181,6 +203,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 0,
          produced => 2,
+             type => 'bytevar',
   },
   23 => {
              name => 'fload',
@@ -188,6 +211,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 0,
          produced => 1,
+             type => 'bytevar',
   },
   24 => {
              name => 'dload',
@@ -195,6 +219,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 0,
          produced => 2,
+             type => 'bytevar',
   },
   25 => {
              name => 'aload',
@@ -202,6 +227,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 0,
          produced => 1,
+             type => 'bytevar',
   },
   26 => {
              name => 'iload_0',
@@ -209,6 +235,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   27 => {
              name => 'iload_1',
@@ -216,6 +243,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   28 => {
              name => 'iload_2',
@@ -223,6 +251,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   29 => {
              name => 'iload_3',
@@ -230,6 +259,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   30 => {
              name => 'lload_0',
@@ -237,6 +267,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   31 => {
              name => 'lload_1',
@@ -244,6 +275,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   32 => {
              name => 'lload_2',
@@ -251,6 +283,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   33 => {
              name => 'lload_3',
@@ -258,6 +291,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   34 => {
              name => 'fload_0',
@@ -265,6 +299,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   35 => {
              name => 'fload_1',
@@ -272,6 +307,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   36 => {
              name => 'fload_2',
@@ -279,6 +315,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   37 => {
              name => 'fload_3',
@@ -286,6 +323,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   38 => {
              name => 'dload_0',
@@ -293,6 +331,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   39 => {
              name => 'dload_1',
@@ -300,6 +339,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   40 => {
              name => 'dload_2',
@@ -307,6 +347,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   41 => {
              name => 'dload_3',
@@ -314,6 +355,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 2,
+             type => 'noargs',
   },
   42 => {
              name => 'aload_0',
@@ -321,6 +363,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   43 => {
              name => 'aload_1',
@@ -328,6 +371,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   44 => {
              name => 'aload_2',
@@ -335,6 +379,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   45 => {
              name => 'aload_3',
@@ -342,6 +387,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 1,
+             type => 'noargs',
   },
   46 => {
              name => 'iaload',
@@ -349,6 +395,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   47 => {
              name => 'laload',
@@ -356,6 +403,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 2,
+             type => 'noargs',
   },
   48 => {
              name => 'faload',
@@ -363,6 +411,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   49 => {
              name => 'daload',
@@ -370,6 +419,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 2,
+             type => 'noargs',
   },
   50 => {
              name => 'aaload',
@@ -377,6 +427,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   51 => {
              name => 'baload',
@@ -384,6 +435,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   52 => {
              name => 'caload',
@@ -391,6 +443,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   53 => {
              name => 'saload',
@@ -398,6 +451,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   54 => {
              name => 'istore',
@@ -405,6 +459,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 1,
          produced => 0,
+             type => 'bytevar',
   },
   55 => {
              name => 'lstore',
@@ -412,6 +467,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 2,
          produced => 0,
+             type => 'bytevar',
   },
   56 => {
              name => 'fstore',
@@ -419,6 +475,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 1,
          produced => 0,
+             type => 'bytevar',
   },
   57 => {
              name => 'dstore',
@@ -426,6 +483,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 2,
          produced => 0,
+             type => 'bytevar',
   },
   58 => {
              name => 'astore',
@@ -433,6 +491,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 1,
          produced => 0,
+             type => 'bytevar',
   },
   59 => {
              name => 'istore_0',
@@ -440,6 +499,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   60 => {
              name => 'istore_1',
@@ -447,6 +507,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   61 => {
              name => 'istore_2',
@@ -454,6 +515,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   62 => {
              name => 'istore_3',
@@ -461,6 +523,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   63 => {
              name => 'lstore_0',
@@ -468,6 +531,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 0,
+             type => 'noargs',
   },
   64 => {
              name => 'lstore_1',
@@ -475,6 +539,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 0,
+             type => 'noargs',
   },
   65 => {
              name => 'lstore_2',
@@ -482,6 +547,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 0,
+             type => 'noargs',
   },
   66 => {
              name => 'lstore_3',
@@ -489,6 +555,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 0,
+             type => 'noargs',
   },
   67 => {
              name => 'fstore_0',
@@ -496,6 +563,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   68 => {
              name => 'fstore_1',
@@ -503,6 +571,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   69 => {
              name => 'fstore_2',
@@ -510,6 +579,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   70 => {
              name => 'fstore_3',
@@ -517,6 +587,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   71 => {
              name => 'dstore_0',
@@ -524,6 +595,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 0,
+             type => 'noargs',
   },
   72 => {
              name => 'dstore_1',
@@ -531,6 +603,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 0,
+             type => 'noargs',
   },
   73 => {
              name => 'dstore_2',
@@ -538,6 +611,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 0,
+             type => 'noargs',
   },
   74 => {
              name => 'dstore_3',
@@ -545,6 +619,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 0,
+             type => 'noargs',
   },
   75 => {
              name => 'astore_0',
@@ -552,6 +627,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   76 => {
              name => 'astore_1',
@@ -559,6 +635,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   77 => {
              name => 'astore_2',
@@ -566,6 +643,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   78 => {
              name => 'astore_3',
@@ -573,6 +651,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   79 => {
              name => 'iastore',
@@ -580,6 +659,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 3,
          produced => 0,
+             type => 'noargs',
   },
   80 => {
              name => 'lastore',
@@ -587,6 +667,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 0,
+             type => 'noargs',
   },
   81 => {
              name => 'fastore',
@@ -594,6 +675,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 3,
          produced => 0,
+             type => 'noargs',
   },
   82 => {
              name => 'dastore',
@@ -601,6 +683,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 0,
+             type => 'noargs',
   },
   83 => {
              name => 'aastore',
@@ -608,6 +691,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 3,
          produced => 0,
+             type => 'noargs',
   },
   84 => {
              name => 'bastore',
@@ -615,6 +699,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 3,
          produced => 0,
+             type => 'noargs',
   },
   85 => {
              name => 'castore',
@@ -622,6 +707,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 3,
          produced => 0,
+             type => 'noargs',
   },
   86 => {
              name => 'sastore',
@@ -629,6 +715,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 3,
          produced => 0,
+             type => 'noargs',
   },
   87 => {
              name => 'pop',
@@ -636,6 +723,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   88 => {
              name => 'pop2',
@@ -643,6 +731,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 0,
+             type => 'noargs',
   },
   89 => {
              name => 'dup',
@@ -650,6 +739,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 2,
+             type => 'noargs',
   },
   90 => {
              name => 'dup_x1',
@@ -657,6 +747,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 3,
+             type => 'noargs',
   },
   91 => {
              name => 'dup_x2',
@@ -664,6 +755,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 3,
          produced => 4,
+             type => 'noargs',
   },
   92 => {
              name => 'dup2',
@@ -671,6 +763,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 4,
+             type => 'noargs',
   },
   93 => {
              name => 'dup2_x1',
@@ -678,6 +771,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 3,
          produced => 5,
+             type => 'noargs',
   },
   94 => {
              name => 'dup2_x2',
@@ -685,6 +779,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 6,
+             type => 'noargs',
   },
   95 => {
              name => 'swap',
@@ -692,6 +787,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 2,
+             type => 'noargs',
   },
   96 => {
              name => 'iadd',
@@ -699,6 +795,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   97 => {
              name => 'ladd',
@@ -706,6 +803,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   98 => {
              name => 'fadd',
@@ -713,6 +811,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   99 => {
              name => 'dadd',
@@ -720,6 +819,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   100 => {
              name => 'isub',
@@ -727,6 +827,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   101 => {
              name => 'lsub',
@@ -734,6 +835,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   102 => {
              name => 'fsub',
@@ -741,6 +843,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   103 => {
              name => 'dsub',
@@ -748,6 +851,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   104 => {
              name => 'imul',
@@ -755,6 +859,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   105 => {
              name => 'lmul',
@@ -762,6 +867,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   106 => {
              name => 'fmul',
@@ -769,6 +875,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   107 => {
              name => 'dmul',
@@ -776,6 +883,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   108 => {
              name => 'idiv',
@@ -783,6 +891,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   109 => {
              name => 'ldiv',
@@ -790,6 +899,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   110 => {
              name => 'fdiv',
@@ -797,6 +907,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   111 => {
              name => 'ddiv',
@@ -804,6 +915,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   112 => {
              name => 'irem',
@@ -811,6 +923,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   113 => {
              name => 'lrem',
@@ -818,6 +931,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   114 => {
              name => 'frem',
@@ -825,6 +939,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   115 => {
              name => 'drem',
@@ -832,6 +947,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   116 => {
              name => 'ineg',
@@ -839,6 +955,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 1,
+             type => 'noargs',
   },
   117 => {
              name => 'lneg',
@@ -846,6 +963,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 2,
+             type => 'noargs',
   },
   118 => {
              name => 'fneg',
@@ -853,6 +971,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 1,
+             type => 'noargs',
   },
   119 => {
              name => 'dneg',
@@ -860,6 +979,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 2,
+             type => 'noargs',
   },
   120 => {
              name => 'ishl',
@@ -867,6 +987,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   121 => {
              name => 'lshl',
@@ -874,6 +995,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 3,
          produced => 2,
+             type => 'noargs',
   },
   122 => {
              name => 'ishr',
@@ -881,6 +1003,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   123 => {
              name => 'lshr',
@@ -888,6 +1011,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 3,
          produced => 2,
+             type => 'noargs',
   },
   124 => {
              name => 'iushr',
@@ -895,6 +1019,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   125 => {
              name => 'lushr',
@@ -902,6 +1027,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 3,
          produced => 2,
+             type => 'noargs',
   },
   126 => {
              name => 'iand',
@@ -909,6 +1035,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   127 => {
              name => 'land',
@@ -916,6 +1043,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   128 => {
              name => 'ior',
@@ -923,6 +1051,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   129 => {
              name => 'lor',
@@ -930,6 +1059,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   130 => {
              name => 'ixor',
@@ -937,6 +1067,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   131 => {
              name => 'lxor',
@@ -944,6 +1075,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 2,
+             type => 'noargs',
   },
   132 => {
              name => 'iinc',
@@ -951,6 +1083,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE, T_BYTE],
          consumed => 0,
          produced => 0,
+             type => 'bytevar',
   },
   133 => {
              name => 'i2l',
@@ -958,6 +1091,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 2,
+             type => 'noargs',
   },
   134 => {
              name => 'i2f',
@@ -965,6 +1099,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 1,
+             type => 'noargs',
   },
   135 => {
              name => 'i2d',
@@ -972,6 +1107,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 2,
+             type => 'noargs',
   },
   136 => {
              name => 'l2i',
@@ -979,6 +1115,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   137 => {
              name => 'l2f',
@@ -986,6 +1123,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   138 => {
              name => 'l2d',
@@ -993,6 +1131,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 2,
+             type => 'noargs',
   },
   139 => {
              name => 'f2i',
@@ -1000,6 +1139,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 1,
+             type => 'noargs',
   },
   140 => {
              name => 'f2l',
@@ -1007,6 +1147,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 2,
+             type => 'noargs',
   },
   141 => {
              name => 'f2d',
@@ -1014,6 +1155,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 2,
+             type => 'noargs',
   },
   142 => {
              name => 'd2i',
@@ -1021,6 +1163,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   143 => {
              name => 'd2l',
@@ -1028,6 +1171,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 2,
+             type => 'noargs',
   },
   144 => {
              name => 'd2f',
@@ -1035,6 +1179,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   145 => {
              name => 'i2b',
@@ -1042,6 +1187,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 1,
+             type => '',
   },
   146 => {
              name => 'i2c',
@@ -1049,6 +1195,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 1,
+             type => '',
   },
   147 => {
              name => 'i2s',
@@ -1056,6 +1203,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 1,
+             type => '',
   },
   148 => {
              name => 'lcmp',
@@ -1063,6 +1211,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 1,
+             type => 'noargs',
   },
   149 => {
              name => 'fcmpl',
@@ -1070,6 +1219,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   150 => {
              name => 'fcmpg',
@@ -1077,6 +1227,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 1,
+             type => 'noargs',
   },
   151 => {
              name => 'dcmpl',
@@ -1084,6 +1235,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 1,
+             type => 'noargs',
   },
   152 => {
              name => 'dcmpg',
@@ -1091,6 +1243,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 4,
          produced => 1,
+             type => 'noargs',
   },
   153 => {
              name => 'ifeq',
@@ -1098,6 +1251,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => 0,
+             type => 'intbranch',
   },
   154 => {
              name => 'ifne',
@@ -1105,6 +1259,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => 0,
+             type => 'intbranch',
   },
   155 => {
              name => 'iflt',
@@ -1112,6 +1267,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => 0,
+             type => 'intbranch',
   },
   156 => {
              name => 'ifge',
@@ -1119,6 +1275,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => 0,
+             type => 'intbranch',
   },
   157 => {
              name => 'ifgt',
@@ -1126,6 +1283,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => 0,
+             type => 'intbranch',
   },
   158 => {
              name => 'ifle',
@@ -1133,6 +1291,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => 0,
+             type => 'intbranch',
   },
   159 => {
              name => 'if_icmpeq',
@@ -1140,6 +1299,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 2,
          produced => 0,
+             type => 'intbranch',
   },
   160 => {
              name => 'if_icmpne',
@@ -1147,6 +1307,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 2,
          produced => 0,
+             type => 'intbranch',
   },
   161 => {
              name => 'if_icmplt',
@@ -1154,6 +1315,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 2,
          produced => 0,
+             type => 'intbranch',
   },
   162 => {
              name => 'if_icmpge',
@@ -1161,6 +1323,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 2,
          produced => 0,
+             type => 'intbranch',
   },
   163 => {
              name => 'if_icmpgt',
@@ -1168,6 +1331,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 2,
          produced => 0,
+             type => 'intbranch',
   },
   164 => {
              name => 'if_icmple',
@@ -1175,6 +1339,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 2,
          produced => 0,
+             type => 'intbranch',
   },
   165 => {
              name => 'if_acmpeq',
@@ -1182,6 +1347,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 2,
          produced => 0,
+             type => 'intbranch',
   },
   166 => {
              name => 'if_acmpne',
@@ -1189,6 +1355,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 2,
          produced => 0,
+             type => 'intbranch',
   },
   167 => {
              name => 'goto',
@@ -1196,6 +1363,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 0,
          produced => 0,
+             type => 'intbranch',
   },
   168 => {
              name => 'jsr',
@@ -1203,6 +1371,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 0,
          produced => 1,
+             type => 'intbranch',
   },
   169 => {
              name => 'ret',
@@ -1210,6 +1379,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 0,
          produced => 0,
+             type => 'bytevar',
   },
   170 => {
              name => 'tableswitch',
@@ -1217,6 +1387,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => '',
   },
   171 => {
              name => 'lookupswitch',
@@ -1224,6 +1395,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => '',
   },
   172 => {
              name => 'ireturn',
@@ -1231,6 +1403,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   173 => {
              name => 'lreturn',
@@ -1238,6 +1411,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 0,
+             type => 'noargs',
   },
   174 => {
              name => 'freturn',
@@ -1245,6 +1419,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   175 => {
              name => 'dreturn',
@@ -1252,6 +1427,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 2,
          produced => 0,
+             type => 'noargs',
   },
   176 => {
              name => 'areturn',
@@ -1259,6 +1435,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   177 => {
              name => 'return',
@@ -1266,6 +1443,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 0,
          produced => 0,
+             type => 'noargs',
   },
   178 => {
              name => 'getstatic',
@@ -1273,6 +1451,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 0,
          produced => undef,
+             type => 'intindex',
   },
   179 => {
              name => 'putstatic',
@@ -1280,6 +1459,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => undef,
          produced => 0,
+             type => 'intindex',
   },
   180 => {
              name => 'getfield',
@@ -1287,6 +1467,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => undef,
+             type => 'intindex',
   },
   181 => {
              name => 'putfield',
@@ -1294,6 +1475,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => undef,
          produced => 0,
+             type => 'intindex',
   },
   182 => {
              name => 'invokevirtual',
@@ -1301,6 +1483,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => undef,
          produced => undef,
+             type => 'intindex',
   },
   183 => {
              name => 'invokespecial',
@@ -1308,6 +1491,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => undef,
          produced => undef,
+             type => 'intindex',
   },
   184 => {
              name => 'invokestatic',
@@ -1315,6 +1499,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => undef,
          produced => undef,
+             type => 'intindex',
   },
   185 => {
              name => 'invokeinterface',
@@ -1322,6 +1507,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT, T_BYTE, T_BYTE],
          consumed => undef,
          produced => undef,
+             type => 'intindex',
   },
   187 => {
              name => 'new',
@@ -1329,6 +1515,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 0,
          produced => 1,
+             type => 'intindex',
   },
   188 => {
              name => 'newarray',
@@ -1336,6 +1523,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 1,
          produced => 1,
+             type => '',
   },
   189 => {
              name => 'anewarray',
@@ -1343,6 +1531,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => 1,
+             type => 'intindex',
   },
   190 => {
              name => 'arraylength',
@@ -1350,6 +1539,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 1,
+             type => 'noargs',
   },
   191 => {
              name => 'athrow',
@@ -1357,6 +1547,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 1,
+             type => 'noargs',
   },
   192 => {
              name => 'checkcast',
@@ -1364,6 +1555,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => 1,
+             type => 'intindex',
   },
   193 => {
              name => 'instanceof',
@@ -1371,6 +1563,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => 1,
+             type => 'intindex',
   },
   194 => {
              name => 'monitorenter',
@@ -1378,6 +1571,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   195 => {
              name => 'monitorexit',
@@ -1385,6 +1579,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [],
          consumed => 1,
          produced => 0,
+             type => 'noargs',
   },
   196 => {
              name => 'wide',
@@ -1392,6 +1587,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 0,
          produced => 0,
+             type => 'noargs',
   },
   197 => {
              name => 'multianewarray',
@@ -1399,6 +1595,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT, T_BYTE],
          consumed => undef,
          produced => 1,
+             type => 'intindex',
   },
   198 => {
              name => 'ifnull',
@@ -1406,6 +1603,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => 0,
+             type => 'intbranch',
   },
   199 => {
              name => 'ifnonnull',
@@ -1413,6 +1611,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_SHORT],
          consumed => 1,
          produced => 0,
+             type => 'intbranch',
   },
   200 => {
              name => 'goto_w',
@@ -1420,6 +1619,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_INT],
          consumed => 0,
          produced => 0,
+             type => 'longbranch',
   },
   201 => {
              name => 'jsr_w',
@@ -1427,6 +1627,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_INT],
          consumed => 0,
          produced => 1,
+             type => 'longbranch',
   },
   202 => {
              name => 'breakpoint',
@@ -1434,6 +1635,7 @@ use constant T_ADDRESS   => 16;
     operand_types => undef,
          consumed => 0,
          produced => 0,
+             type => 'noargs',
   },
   254 => {
              name => 'impdep1',
@@ -1441,6 +1643,7 @@ use constant T_ADDRESS   => 16;
     operand_types => undef,
          consumed => undef,
          produced => undef,
+             type => '',
   },
   255 => {
              name => 'impdep2',
@@ -1448,6 +1651,7 @@ use constant T_ADDRESS   => 16;
     operand_types => undef,
          consumed => undef,
          produced => undef,
+             type => '',
   },
 );
 # Here ends autogenerated stuff

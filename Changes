@@ -1,5 +1,10 @@
 Revision history for Perl module Java::JVM::Classfile
 
+0.15 Thu Oct 25 11:39:05 BST 2001
+	- much more robust bytecode parser which parses more bytecodes
+	and copes with branches and labels (new Bench.class and bench.t)
+	- support for LineNumberTable attribute (and docs & tests)
+
 0.14 Thu Oct 18 19:10:13 BST 2001
 	- added bytecode parser (see Code attribute)
 

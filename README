@@ -179,11 +179,22 @@ METHODS
             print "stack(" . $value->max_stack . ")";
             print ", locals(" . $value->max_locals . ")\n";
             foreach my $instruction (@{$value->code}) {
+              print $instruction->label . ':' if defined $instruction->label;
               print "\t" . $instruction->op . "\t" . (join ", ", @{$instruction->args}) . "\n";
             }
             print "\n";
+            foreach my $att2 (@{$value->attributes}) {
+              my $name2 = $att2->name;
+              my $value2 = $att2->value;
+              if ($name2 eq 'LineNumberTable') {
+                print "\tLineNumberTable (offset, line)\n";
+                print "\t" . $_->offset . ", " . $_->line . "\n" foreach (@$value2);
+              } else {
+                print "!\t$name2 = $value2\n";
+              }
+            }
           } else {
-            print "      $name $value\n";
+            print "!\t$name $value\n";
           }
         }
         print "\n";
@@ -192,8 +203,11 @@ METHODS
     Note that in the case of the Code attribute, the value contains an
     object which has three main methods: max_stack (the maximum depth of
     stack needed by the method), max_locals (the number of local variables
-    used by the method), and code (returns an arrayref of instruction
-    objects which have an op and args method).
+    used by the method), code (returns an arrayref of instruction objects
+    which have op, args and label methods), and attributes. One attribute
+    that Code can have is the LineNumberTable attributes, which has an
+    arrayref of objects as a value. These have offset and line methods,
+    representing a link between bytecode offset and sourcecode line.
 
   attributes
 

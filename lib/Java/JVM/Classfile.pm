@@ -98,13 +98,18 @@ sub as_text {
   my @args = @{$self->args};
 
   my $output;
-  $output .= 'L' . $label . ':' if $label;
+  $output .= 'L' . $label . ':' if defined $label;
   $output .= "\t";
   $output .= $op;
   $output .= "\t";
   $output .= join(", ", @args);
   return $output;
 }
+
+package Java::JVM::Classfile::LineNumber;
+use Class::Struct;
+struct(offset => '$',
+       line => '$');
 
 package Java::JVM::Classfile;
 
@@ -165,7 +170,7 @@ my @ACCESS = (
     "public", "private", "protected", "static", "final", "synchronized",
     "volatile", "transient", "native", "interface", "abstract");
 
-$VERSION = '0.14';
+$VERSION = '0.15';
 
 use constant T_BOOLEAN => 4;
 use constant T_CHAR    => 5;
@@ -436,6 +441,15 @@ sub read_attributes {
       my $sourcefile = $constant_pool->[$sourcefile_index];
       die "sourcefile_index doesn't point to string" unless $sourcefile->type eq 'utf8';
       $info = $sourcefile->value;
+    } elsif ($attribute_name eq 'LineNumberTable') {
+      my $line_number_table_length = $self->read_u2;
+      my @lines;
+      foreach (0..$line_number_table_length-1) {
+	my $start_pc = $self->read_u2;
+	my $line_number = $self->read_u2;
+	push @lines, Java::JVM::Classfile::LineNumber->new(offset => $start_pc, line => $line_number);
+      }
+      $info = \@lines;
     } else {
       warn "unknown attribute $attribute_name!\n";
       # Fake it for now
@@ -448,58 +462,112 @@ sub read_attributes {
   return \@attributes;
 }
 
+
 sub read_code {
   my($self, $constant_pool) = @_;
 
   my $code_length = $self->read_u4;
   my $offset = 0;
+  my $is_wide = 0;
+  my $index = 0;
 
   my @instructions;
+  my @fixups;
+  my %offsets;
+  my %offset;
 
   while($offset < $code_length) {
+    my $origoffset = $offset;
     my $u1 = $self->read_u1;
     $offset += 1;
     my $op = $ops{$u1};
     my $opname = $op->{name};
+    my $type = $op->{type};
     my @operands;
-    foreach my $operand (@{$op->{operand_types}}) {
-      if ($operand == T_BYTE) {
-	my $constant = $self->read_u1;
-	if ($opname eq 'ldc') {
-	  $constant = $constant_pool->[$constant_pool->[$constant]->values->[0]]->value;
-	  push @operands, $constant;
-	} else {
-	  push @operands, $constant;
-	}
-	$offset += 1;
-      } elsif ($operand == T_SHORT) {
-	my $constant = $constant_pool->[$self->read_u2];
-	if ($constant->type eq 'fieldref') {
-#	  print "fieldref!\n";
-	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[0]]->values->[0]]->value;
-	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[0]]->value;
-	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[1]]->value;
-	} elsif ($constant->type eq 'methodref') {
-#	  print "methodref!\n";
-	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[0]]->values->[0]]->value;
-	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[0]]->value;
-	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[1]]->value;
-	} else {
-	  print "unknown op: " . $constant->type . "!\n";
-	  push @operands, $constant;
-	}
-	$offset += 2;
-      } elsif ($operand == T_INT) {
-	push @operands, $self->read_u4;
-	$offset += 4;
-      }
+#    print "# $opname ($type)\n";
+
+    if ($type eq 'noargs') {
+    } elsif ($type eq 'byte') {
+      my $u1 = $self->read_u1;
+      $offset += 1;
+      push @operands, $u1;
+    } elsif ($type eq 'bytevar') {
+      my $u1 = $self->read_u1;
+      $offset += 1;
+      push @operands, $u1;
+    } elsif ($type eq 'byteindex') {
+      my $u1 = $self->read_u1;
+      $offset += 1;
+      push @operands, $self->get_index($u1, $constant_pool);
+    } elsif ($type eq 'intindex') {
+      my $u2 = $self->read_u2;
+      $offset += 2;
+      push @operands, $self->get_index($u2, $constant_pool);
+    } elsif ($type eq 'intbranch') {
+      my $u2 = $self->read_u2;
+      $u2 = $u2 - 65536 if $u2 > 31268;
+      $offset += 2;
+      push @operands, $u2;
+      push @fixups, $index;
+    } else {
+      die "unknown type $type, uh-oh!";
     }
-    my $i = Java::JVM::Classfile::Instruction->new(op => $opname, args => \@operands);
+
+    my $i = Java::JVM::Classfile::Instruction->new(op => $opname, args => \@operands, label => 'L'.$origoffset);
     push @instructions, $i;
 #    print "$i\n";
 #    print "# $offset $opname " . join(", ", @operands) . "\n";
+
+    $offsets{$origoffset} = $index;
+    $offset{$index} = $origoffset;
+    $index++;
   }
+
+  # Fix up pointers
+  my %is_target;
+  foreach my $fixup (@fixups) {
+    my $i = $instructions[$fixup];
+    my $offset = $i->args->[0] + $offset{$fixup};
+    my $target = $instructions[$offsets{$offset}];
+#    print "! Fixing up $i ($offset) -> $target\n";
+    $instructions[$fixup] = Java::JVM::Classfile::Instruction->new(
+    op => $i->op, args => ['L'.$offset], label => $i->label);
+    $i = $instructions[$fixup];
+    $is_target{$target}++;
+  }
+
+  foreach my $i (@instructions) {
+    $i->label(undef) unless $is_target{$i};
+  }
+
   return \@instructions;
+}
+
+sub get_index {
+  my($self, $index, $constant_pool) = @_;
+
+  my $constant = $constant_pool->[$index];
+  my $type = $constant->type;
+  my @operands;
+
+#  print "# $index = $constant\n";
+  if ($type eq 'methodref') {
+    push @operands, $constant_pool->[$constant_pool->[$constant->values->[0]]->values->[0]]->value;
+    push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[0]]->value;
+    push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[1]]->value;
+  } elsif ($type eq 'fieldref') {
+    push @operands, $constant_pool->[$constant_pool->[$constant->values->[0]]->values->[0]]->value;
+    push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[0]]->value;
+    push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[1]]->value;
+  } elsif ($type eq 'class') {
+    push @operands, $constant_pool->[$constant->value]->value;
+  } elsif ($type eq 'string') {
+    push @operands, $constant_pool->[$constant->value]->value;
+  } else {
+    die "unknown index type $type!\n";
+  }
+
+  return @operands;
 }
 
 sub read_u4 {
@@ -745,11 +813,22 @@ for the method:
         print "stack(" . $value->max_stack . ")";
         print ", locals(" . $value->max_locals . ")\n";
         foreach my $instruction (@{$value->code}) {
+	  print $instruction->label . ':' if defined $instruction->label;
   	  print "\t" . $instruction->op . "\t" . (join ", ", @{$instruction->args}) . "\n";
         }
         print "\n";
+        foreach my $att2 (@{$value->attributes}) {
+	  my $name2 = $att2->name;
+	  my $value2 = $att2->value;
+	  if ($name2 eq 'LineNumberTable') {
+	    print "\tLineNumberTable (offset, line)\n";
+	    print "\t" . $_->offset . ", " . $_->line . "\n" foreach (@$value2);
+	  } else {
+	    print "!\t$name2 = $value2\n";
+	  }
+	}
       } else {
-        print "      $name $value\n";
+        print "!\t$name $value\n";
       }
     }
     print "\n";
@@ -758,8 +837,13 @@ for the method:
 Note that in the case of the Code attribute, the value contains an
 object which has three main methods: max_stack (the maximum depth of
 stack needed by the method), max_locals (the number of local variables
-used by the method), and code (returns an arrayref of instruction
-objects which have an op and args method).
+used by the method), code (returns an arrayref of instruction objects
+which have op, args and label methods), and attributes. One attribute
+that Code can have is the LineNumberTable attributes, which has an
+arrayref of objects as a value. These have offset and line methods,
+representing a link between bytecode offset and sourcecode line.
+
+
 
 =head2 attributes
 
