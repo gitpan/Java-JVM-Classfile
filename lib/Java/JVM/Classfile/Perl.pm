@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION @ISA);
 use Java::JVM::Classfile;
 
-$VERSION = '0.12';
+$VERSION = '0.13';
 
 sub new {
   my $class = shift;
@@ -140,7 +140,7 @@ sub toString {
 	} elsif ($op eq 'ldc') {
 	  my $arg = $args[0];
 	  $code .= "push \@stack, '$arg';\n";
-	} elsif ($op eq 'bipush') {
+	} elsif ($op eq 'bipush' or $op eq 'sipush') {
 	  my $arg = $args[0];
 	  $code .= "push \@stack, $arg;\n";
 	} elsif ($op eq 'return') {

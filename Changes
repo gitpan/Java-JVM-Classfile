@@ -1,5 +1,10 @@
 Revision history for Perl module Java::JVM::Classfile
 
+0.17 Tue Apr 16 16:25:43 GMT 2002
+	- support for int type
+	- support for sipush opcode
+	- new spin and fibo tests
+
 0.16 Sat Dec 15 15:57:06 GMT 2001
 	- added support for iinc, newarray opcodes
 	- new Java::JVM::Classfile::Perl which converts JVM

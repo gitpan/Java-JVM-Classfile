@@ -6,7 +6,7 @@
 # change 'tests => 1' to 'tests => last_test_to_print';
 
 use strict;
-use Test::Simple tests => 39;
+use Test::More tests => 39;
 use lib 'lib';
 use Java::JVM::Classfile;
 ok(1); # If we made it this far, we're ok.
@@ -16,7 +16,7 @@ ok(1); # If we made it this far, we're ok.
 # Insert your test code below, the Test module is use()ed here so read
 # its man page ( perldoc Test ) for help writing this test script.
 
-my $c = Java::JVM::Classfile->new("Bench.class");
+my $c = Java::JVM::Classfile->new("examples/Bench.class");
 ok(ref($c), "Loaded Bench");
 ok($c->magic == 0xCAFEBABE, "Good magic");
 ok($c->version eq '45.3', "Right compiler version");
@@ -67,49 +67,49 @@ ok($code->max_locals == 5, "main has 5 max locals");
 $text = "";
 foreach my $instruction (@{$code->code}) {
   $text .= $instruction->label . ':' if defined $instruction->label;
-  $text .= "\t" . $instruction->op . "\t" . (join ", ", map { $_ = '"\n"' if $_ eq "\n" } @{$instruction->args}) . "\n";
+  $text .= "\t" . $instruction->op . "\t" . (join ", ", map { ($_ eq "\n") ? '"\n"' : $_ } @{$instruction->args}) . "\n";
 }
-ok($text eq q|	iconst_1	
+is($text, q|	iconst_1	
 	istore_1	
 	iconst_1	
 	istore_2	
 	iconst_1	
 	istore_3	
 	iconst_1	
-	istore	
-	goto	
+	istore	4
+	goto	L74
 L12:	iconst_1	
 	istore_2	
-	goto	
-L17:	getstatic	, , 
-	new	
+	goto	L65
+L17:	getstatic	java/lang/System, out, Ljava/io/PrintStream;
+	new	java/lang/StringBuffer
 	dup	
-	invokespecial	, , 
+	invokespecial	java/lang/StringBuffer, <init>, ()V
 	iload_1	
-	invokevirtual	, , 
-	ldc	
-	invokevirtual	, , 
+	invokevirtual	java/lang/StringBuffer, append, (I)Ljava/lang/StringBuffer;
+	ldc	, 
+	invokevirtual	java/lang/StringBuffer, append, (Ljava/lang/String;)Ljava/lang/StringBuffer;
 	iload_2	
-	invokevirtual	, , 
+	invokevirtual	java/lang/StringBuffer, append, (I)Ljava/lang/StringBuffer;
 	ldc	"\n"
-	invokevirtual	, , 
-	invokevirtual	, , 
-	invokevirtual	, , 
-	iinc	, 
-	iload	
+	invokevirtual	java/lang/StringBuffer, append, (Ljava/lang/String;)Ljava/lang/StringBuffer;
+	invokevirtual	java/lang/StringBuffer, toString, ()Ljava/lang/String;
+	invokevirtual	java/io/PrintStream, print, (Ljava/lang/String;)V
+	iinc	3, 1
+	iload	4
 	iload_3	
 	iconst_2	
 	imul	
 	iadd	
-	istore	
-	iinc	, 
+	istore	4
+	iinc	2, 1
 L65:	iload_2	
-	bipush	
-	if_icmplt	
-	iinc	, 
+	bipush	10
+	if_icmplt	L17
+	iinc	1, 1
 L74:	iload_1	
-	bipush	
-	if_icmplt	
+	bipush	10
+	if_icmplt	L12
 	return	
 |, "main contains good code");
 ok(scalar(@{$code->attributes}) == 1, "main code has 1 attribute");

@@ -170,7 +170,7 @@ my @ACCESS = (
     "public", "private", "protected", "static", "final", "synchronized",
     "volatile", "transient", "native", "interface", "abstract");
 
-$VERSION = '0.16';
+$VERSION = '0.17';
 
 use constant T_BOOLEAN => 4;
 use constant T_CHAR    => 5;
@@ -508,6 +508,10 @@ sub read_code {
       $u1 = $u1 - 256 if $u1 > 128;
       $offset += 1;
       push @operands, $u1;
+    } elsif ($type eq 'int') {
+      my $u2 = $self->read_u2;
+      $offset += 2;
+      push @operands, $u2;
     } elsif ($type eq 'intindex') {
       my $u2 = $self->read_u2;
       $offset += 2;
@@ -884,7 +888,7 @@ Leon Brocard E<lt>F<acme@astray.com>E<gt>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001, Leon Brocard
+Copyright (C) 2001-2, Leon Brocard
 
 This module is free software; you can redistribute it or modify it
 under the same terms as Perl itself.
