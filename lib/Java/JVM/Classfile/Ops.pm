@@ -1083,7 +1083,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE, T_BYTE],
          consumed => 0,
          produced => 0,
-             type => 'bytevar',
+             type => 'twobytes',
   },
   133 => {
              name => 'i2l',
@@ -1523,7 +1523,7 @@ use constant T_ADDRESS   => 16;
     operand_types => [T_BYTE],
          consumed => 1,
          produced => 1,
-             type => '',
+             type => 'byte',
   },
   189 => {
              name => 'anewarray',

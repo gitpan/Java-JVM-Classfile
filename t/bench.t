@@ -67,55 +67,51 @@ ok($code->max_locals == 5, "main has 5 max locals");
 $text = "";
 foreach my $instruction (@{$code->code}) {
   $text .= $instruction->label . ':' if defined $instruction->label;
-  $text .= "\t" . $instruction->op . "\t" . (join ", ", @{$instruction->args}) . "\n";
+  $text .= "\t" . $instruction->op . "\t" . (join ", ", map { $_ = '"\n"' if $_ eq "\n" } @{$instruction->args}) . "\n";
 }
-ok($text eq "	iconst_1	
+ok($text eq q|	iconst_1	
 	istore_1	
 	iconst_1	
 	istore_2	
 	iconst_1	
 	istore_3	
 	iconst_1	
-	istore	4
-	goto	L74
+	istore	
+	goto	
 L12:	iconst_1	
 	istore_2	
-	goto	L65
-L17:	getstatic	java/lang/System, out, Ljava/io/PrintStream;
-	new	java/lang/StringBuffer
+	goto	
+L17:	getstatic	, , 
+	new	
 	dup	
-	invokespecial	java/lang/StringBuffer, <init>, ()V
+	invokespecial	, , 
 	iload_1	
-	invokevirtual	java/lang/StringBuffer, append, (I)Ljava/lang/StringBuffer;
-	ldc	, 
-	invokevirtual	java/lang/StringBuffer, append, (Ljava/lang/String;)Ljava/lang/StringBuffer;
-	iload_2	
-	invokevirtual	java/lang/StringBuffer, append, (I)Ljava/lang/StringBuffer;
+	invokevirtual	, , 
 	ldc	
-
-	invokevirtual	java/lang/StringBuffer, append, (Ljava/lang/String;)Ljava/lang/StringBuffer;
-	invokevirtual	java/lang/StringBuffer, toString, ()Ljava/lang/String;
-	invokevirtual	java/io/PrintStream, print, (Ljava/lang/String;)V
-	iinc	3
-	aconst_null	
-	iload	4
+	invokevirtual	, , 
+	iload_2	
+	invokevirtual	, , 
+	ldc	"\n"
+	invokevirtual	, , 
+	invokevirtual	, , 
+	invokevirtual	, , 
+	iinc	, 
+	iload	
 	iload_3	
 	iconst_2	
 	imul	
 	iadd	
-	istore	4
-	iinc	2
-	aconst_null	
+	istore	
+	iinc	, 
 L65:	iload_2	
-	bipush	10
-	if_icmplt	L17
-	iinc	1
-	aconst_null	
+	bipush	
+	if_icmplt	
+	iinc	, 
 L74:	iload_1	
-	bipush	10
-	if_icmplt	L12
+	bipush	
+	if_icmplt	
 	return	
-", "main contains good code");
+|, "main contains good code");
 ok(scalar(@{$code->attributes}) == 1, "main code has 1 attribute");
 ok($code->attributes->[0]->name eq 'LineNumberTable', "main code has LineNumberTable attribute");
 $text = "";

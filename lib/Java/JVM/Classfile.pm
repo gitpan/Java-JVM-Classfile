@@ -170,7 +170,7 @@ my @ACCESS = (
     "public", "private", "protected", "static", "final", "synchronized",
     "volatile", "transient", "native", "interface", "abstract");
 
-$VERSION = '0.15';
+$VERSION = '0.16';
 
 use constant T_BOOLEAN => 4;
 use constant T_CHAR    => 5;
@@ -499,6 +499,15 @@ sub read_code {
       my $u1 = $self->read_u1;
       $offset += 1;
       push @operands, $self->get_index($u1, $constant_pool);
+    } elsif ($type eq 'twobytes') {
+      my $u1 = $self->read_u1;
+      $u1 = $u1 - 256 if $u1 > 128;
+      $offset += 1;
+      push @operands, $u1;
+      $u1 = $self->read_u1;
+      $u1 = $u1 - 256 if $u1 > 128;
+      $offset += 1;
+      push @operands, $u1;
     } elsif ($type eq 'intindex') {
       my $u2 = $self->read_u2;
       $offset += 2;

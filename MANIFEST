@@ -8,6 +8,8 @@ Makefile.PL
 README
 lib/Java/JVM/Classfile.pm
 lib/Java/JVM/Classfile/Ops.pm
-run.pl
+lib/Java/JVM/Classfile/Perl.pm
+class2perl.pl
+class2text.pl
 t/bench.t
 t/simple.t
