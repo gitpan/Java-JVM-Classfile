@@ -1,5 +1,8 @@
 Revision history for Perl module Java::JVM::Classfile
 
+0.14 Thu Oct 18 19:10:13 BST 2001
+	- added bytecode parser (see Code attribute)
+
 0.12 Mon Oct  8 12:22:43 BST 2001
 	- created and released first version
 

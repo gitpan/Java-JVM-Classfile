@@ -37,11 +37,22 @@ struct(name => '$',
 sub as_text {
   my $self = shift;
   my $name = $self->name;
-  if ($name eq 'Code') {
-    return $name;
-  } else {
-    return $name . ' (' . $self->value . ')';
-  }
+  return $name . ' (' . $self->value . ')';
+}
+
+package Java::JVM::Classfile::Attribute::Code;
+use Class::Struct;
+use overload '""' => \&as_text;
+struct(max_stack => '$',
+       max_locals => '$',
+       code => '$',
+       exception_table => '$',
+       attributes => '$');
+sub as_text {
+  my $self = shift;
+  my $return;
+  $return .= "stack(" . $self->max_stack . ")";
+  $return .= ", locals(" . $self->max_locals . ")";
 }
 
 package Java::JVM::Classfile::Struct;
@@ -72,6 +83,27 @@ sub as_text {
   $result .= "Methods:\n" . $self->methods . "\n";
   $result .= "Attributes:\n" . $self->attributes . "\n";
   return $result;
+}
+
+package Java::JVM::Classfile::Instruction;
+use Class::Struct;
+struct(label => '$',
+       op => '$', # '
+       args => '@');
+use overload '""' => \&as_text;
+sub as_text {
+  my $self = shift;
+  my $label = $self->label;
+  my $op = $self->op;
+  my @args = @{$self->args};
+
+  my $output;
+  $output .= 'L' . $label . ':' if $label;
+  $output .= "\t";
+  $output .= $op;
+  $output .= "\t";
+  $output .= join(", ", @args);
+  return $output;
 }
 
 package Java::JVM::Classfile;
@@ -133,7 +165,25 @@ my @ACCESS = (
     "public", "private", "protected", "static", "final", "synchronized",
     "volatile", "transient", "native", "interface", "abstract");
 
-$VERSION = '0.12';
+$VERSION = '0.14';
+
+use constant T_BOOLEAN => 4;
+use constant T_CHAR    => 5;
+use constant T_FLOAT   => 6;
+use constant T_DOUBLE  => 7;
+use constant T_BYTE    => 8;
+use constant T_SHORT   => 9;
+use constant T_INT     => 10;
+use constant T_LONG    => 11;
+use constant T_VOID      => 12;
+use constant T_ARRAY     => 13;
+use constant T_OBJECT    => 14;
+use constant T_REFERENCE => 14;
+use constant T_UNKNOWN   => 15;
+use constant T_ADDRESS   => 16;
+
+# Import all the constants
+use Java::JVM::Classfile::Ops qw(%ops);
 
 sub new {
   my $proto = shift;
@@ -183,61 +233,60 @@ sub _parse {
 
 sub check_magic {
   my $self = shift;
-  my $magic = $self->readint;
+  my $magic = $self->read_u4;
   die "Not Java class file!\n" unless ($magic eq 0xCAFEBABE);
   return $magic;
 }
 
 sub read_version {
   my $self = shift;
-  my $minor = $self->readus;
-  my $major = $self->readus;
-#  print "Compiler version: " . $self->{major} . '.' . $self->{minor} . "\n";
+  my $minor = $self->read_u2;
+  my $major = $self->read_u2;
   return "$major.$minor";
 }
 
 sub read_constant_pool {
   my $self = shift;
-  my $count = $self->readus;
+  my $count = $self->read_u2;
 
   my @constant_pool;
 
 #  print "Constant pool entries: $count \n";
   foreach my $index (1 .. $count - 1) {
 #    print "constant pool $index: ";
-    my $type = $self->readbyte;
+    my $type = $self->read_u1;
     if ($type == Methodref) {
-      my $class_index = $self->readus;
-      my $name_and_type_index = $self->readus;
+      my $class_index = $self->read_u2;
+      my $name_and_type_index = $self->read_u2;
       $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
         'methodref', values => [$class_index, $name_and_type_index]);
 #      print "methodref $class_index, $name_and_type_index\n";
     } elsif ($type == Fieldref) {
-      my $class_index = $self->readus;
-      my $name_and_type_index = $self->readus;
+      my $class_index = $self->read_u2;
+      my $name_and_type_index = $self->read_u2;
       $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
         'fieldref', values => [$class_index, $name_and_type_index]);
 #      print "fieldref $class_index, $name_and_type_index\n";
     } elsif ($type == Class) {
-      my $name_index = $self->readus;
+      my $name_index = $self->read_u2;
       $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
         'class', values => [$name_index]);
 #      print "class $name_index\n";
     } elsif ($type == Utf8) {
-      my $length = $self->readus;
+      my $length = $self->read_u2;
       my $string;
-      $string .= chr($self->readbyte) foreach (1..$length);
+      $string .= chr($self->read_u1) foreach (1..$length);
       $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
         'utf8', values => [$string]);
 #      print "String: $string\n";
     } elsif ($type == NameAndType) {
-      my $name_index = $self->readus;
-      my $descriptor_index = $self->readus;
+      my $name_index = $self->read_u2;
+      my $descriptor_index = $self->read_u2;
       $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
         'nameandtype', values => [$name_index, $descriptor_index]);
 #      print "nameandtype: $name_index $descriptor_index\n";
     } elsif ($type == String) {
-      my $string_index = $self->readus;
+      my $string_index = $self->read_u2;
       $constant_pool[$index] = Java::JVM::Classfile::ConstantPoolEntry->new(type =>
         'string', values => [$string_index]);
     } else {
@@ -253,7 +302,7 @@ sub read_class_info {
 
 
   my @flags;
-  my $access_flags = $self->readus;
+  my $access_flags = $self->read_u2;
 
   if(($access_flags & ACC_INTERFACE) != 0) {
     $access_flags |= ACC_ABSTRACT;
@@ -272,14 +321,14 @@ sub read_class_info {
     push @flags, $CLASSACCESS[$index] if substr($bits, $index, 1);
   }
 #  print "\n";
-  my $class_name_index = $self->readus;
+  my $class_name_index = $self->read_u2;
   my $class = $constant_pool->[$class_name_index];
   die "Class name index doesn't point to class!" unless $class->type eq 'class';
   my $class_name = $constant_pool->[$class->value];
   die "Class name class doesn't point to string!" unless $class_name->type eq 'utf8';
   my $myclass_name = $class_name->value;
 
-  my $superclass_name_index = $self->readus;
+  my $superclass_name_index = $self->read_u2;
   $class = $constant_pool->[$superclass_name_index];
   die "Superclass name index doesn't point to class!" unless $class->type eq 'class';
   $class_name = $constant_pool->[$class->value];
@@ -293,7 +342,7 @@ sub read_class_info {
 sub read_interfaces {
   my $self = shift;
 
-  my $interfaces_count = $self->readus;
+  my $interfaces_count = $self->read_u2;
   die "Interfaces not yet supported!" if $interfaces_count;
 
   return [];
@@ -302,7 +351,7 @@ sub read_interfaces {
 sub read_fields {
   my $self = shift;
 
-  my $fields_count = $self->readus;
+  my $fields_count = $self->read_u2;
   die "Interfaces not yet supported!" if $fields_count;
 
   return [];
@@ -313,13 +362,13 @@ sub read_methods {
 
   my @methods;
 
-  my $method_count = $self->readus;
+  my $method_count = $self->read_u2;
 #  print "Methods: $method_count\n";
 
   foreach my $index (0..$method_count-1) {
-#    $methods[$_] = $self->readus;
+#    $methods[$_] = $self->read_u2;
 
-    my $access_flags = $self->readus;
+    my $access_flags = $self->read_u2;
     my @access_flags;
 
     my $bits = reverse unpack("B*", pack ("c*" ,$access_flags));
@@ -327,11 +376,12 @@ sub read_methods {
       push @access_flags, $METHODACCESS[$index] if substr($bits, $index, 1);
     }
 
-    my $name_index = $self->readus;
+    my $name_index = $self->read_u2;
     my $name = $constant_pool->[$name_index];
+
     die "name_index doesn't point to string" unless $name->type eq 'utf8';
     $name = $name->value;
-    my $descriptor_index = $self->readus;
+    my $descriptor_index = $self->read_u2;
     my $descriptor = $constant_pool->[$descriptor_index];
     die "descriptor_index doesn't point to string" unless $descriptor->type eq 'utf8';
     $descriptor = $descriptor->value;
@@ -352,24 +402,45 @@ sub read_methods {
 sub read_attributes {
   my($self, $constant_pool) = @_;
 
-  my $attributes_count = $self->readus;
+  my $attributes_count = $self->read_u2;
+#  print "count: $attributes_count\n";
   my @attributes;
   foreach (0..$attributes_count-1) {
-    my $attribute_name_index = $self->readus;
+    my $attribute_name_index = $self->read_u2;
+#    print "index: $attribute_name_index\n";
     my $attribute_name = $constant_pool->[$attribute_name_index];
+#    print "= $attribute_name\n";
     die "attribute_name_index doesn't point to string" unless $attribute_name->type eq 'utf8';
     $attribute_name = $attribute_name->value;
-    my $attribute_length = $self->readint;
+    my $attribute_length = $self->read_u4;
     my $info;
     if ($attribute_name eq 'Code') {
-      $info = "";
-      $info .= chr($self->readbyte) foreach (0..$attribute_length-1);
+      my $max_stack = $self->read_u2;
+      my $max_locals = $self->read_u2;
+      my $code = $self->read_code($constant_pool);
+      my $exception_table_length = $self->read_u2;
+      my $exception_table = [];
+      my $atts = $self->read_attributes($constant_pool);
+      die "Exceptions unsupported!" if $exception_table_length;
+
+      $info = Java::JVM::Classfile::Attribute::Code->new(
+        max_stack => $max_stack,
+        max_locals => $max_locals,
+        code => $code,
+        exception_table => $exception_table,
+        attributes => $atts,
+      );
     } elsif ($attribute_name eq 'SourceFile') {
       die "length not 2" if $attribute_length != 2;
-      my $sourcefile_index = $self->readus;
+      my $sourcefile_index = $self->read_u2;
       my $sourcefile = $constant_pool->[$sourcefile_index];
       die "sourcefile_index doesn't point to string" unless $sourcefile->type eq 'utf8';
       $info = $sourcefile->value;
+    } else {
+      warn "unknown attribute $attribute_name!\n";
+      # Fake it for now
+      $info = "";
+      $info .= chr($self->read_u1) foreach (0..$attribute_length-1);
     }
 #    print "info: $info<--\n" if $attribute_name ne 'Code';
     push @attributes, Java::JVM::Classfile::Attribute->new(name => $attribute_name, value => $info);
@@ -377,34 +448,75 @@ sub read_attributes {
   return \@attributes;
 }
 
-sub read_attributes_off {
-  my $self = shift;
+sub read_code {
+  my($self, $constant_pool) = @_;
 
-  my $attributes_count = $self->readus;
-#  print "Attributes: $attributes_count\n";
-  my @attributes;
-  foreach (0..$attributes_count-1) {
-#    print "Attributes $_:\n";
-#    $methods[$_] = $self->readus;
-      my $attribute_name_index = $self->readus;
-      my $attribute_length = $self->readint;
-      my $info = "";
-#      print "  name: $attribute_name_index\n";
-#      print "  info length: $attribute_length\n";
-      $info .= chr($self->readbyte) foreach (0..$attribute_length-1);
-#      print "  info: $info\n";
+  my $code_length = $self->read_u4;
+  my $offset = 0;
+
+  my @instructions;
+
+  while($offset < $code_length) {
+    my $u1 = $self->read_u1;
+    $offset += 1;
+    my $op = $ops{$u1};
+    my $opname = $op->{name};
+    my @operands;
+    foreach my $operand (@{$op->{operand_types}}) {
+      if ($operand == T_BYTE) {
+	my $constant = $self->read_u1;
+	if ($opname eq 'ldc') {
+	  $constant = $constant_pool->[$constant_pool->[$constant]->values->[0]]->value;
+	  push @operands, $constant;
+	} else {
+	  push @operands, $constant;
+	}
+	$offset += 1;
+      } elsif ($operand == T_SHORT) {
+	my $constant = $constant_pool->[$self->read_u2];
+	if ($constant->type eq 'fieldref') {
+#	  print "fieldref!\n";
+	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[0]]->values->[0]]->value;
+	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[0]]->value;
+	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[1]]->value;
+	} elsif ($constant->type eq 'methodref') {
+#	  print "methodref!\n";
+	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[0]]->values->[0]]->value;
+	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[0]]->value;
+	  push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[1]]->value;
+	} else {
+	  print "unknown op: " . $constant->type . "!\n";
+	  push @operands, $constant;
+	}
+	$offset += 2;
+      } elsif ($operand == T_INT) {
+	push @operands, $self->read_u4;
+	$offset += 4;
+      }
+    }
+    my $i = Java::JVM::Classfile::Instruction->new(op => $opname, args => \@operands);
+    push @instructions, $i;
+#    print "$i\n";
+#    print "# $offset $opname " . join(", ", @operands) . "\n";
   }
+  return \@instructions;
 }
 
-sub readint {
+sub read_u4 {
   my $self = shift;
   my $fh = $self->{FH};
-  local $/ = \4;
-  my $int = unpack('N', <$fh>);
+  local $/ = \1;
+  my $int = unpack('C', <$fh>);
+  $int *= 256;
+  $int += unpack('C', <$fh>);
+  $int *= 256;
+  $int += unpack('C', <$fh>);
+  $int *= 256;
+  $int += unpack('C', <$fh>);
   return $int;
 }
 
-sub readus {
+sub read_u2 {
   my $self = shift;
   my $fh = $self->{FH};
   local $/ = \1;
@@ -414,7 +526,7 @@ sub readus {
   return $int;
 }
 
-sub readbyte {
+sub read_u1 {
   my $self = shift;
   my $fh = $self->{FH};
   local $/ = \1;
@@ -616,18 +728,38 @@ Declared synchronized; invocation is wrapped in a monitor lock
 =back
 
 Various attributes are possible, the most common being the Code
-attribute, where the value holds the Java bytecode for the method. At
-this moment disassembling the bytecode is not currently possible, but
-it is planned.
+attribute, where the value holds information about the Java bytecode
+for the method:
 
   foreach my $method (@{$c->methods}) {
     print "  " . $method->name . " " . $method->descriptor;
     print "\n    ";
     print "is " . join(", ", @{$method->access_flags});
     print "\n    ";
-    print "has attributes " . join(", ", map { $_->name } @{$method->attributes});
+    print "has attributes: ";
+    foreach my $att (@{$method->attributes}) {
+      my $name = $att->name;
+      my $value = $att->value;
+      if ($att->name eq 'Code') {
+        print "      $name: ";
+        print "stack(" . $value->max_stack . ")";
+        print ", locals(" . $value->max_locals . ")\n";
+        foreach my $instruction (@{$value->code}) {
+  	  print "\t" . $instruction->op . "\t" . (join ", ", @{$instruction->args}) . "\n";
+        }
+        print "\n";
+      } else {
+        print "      $name $value\n";
+      }
+    }
     print "\n";
   }
+
+Note that in the case of the Code attribute, the value contains an
+object which has three main methods: max_stack (the maximum depth of
+stack needed by the method), max_locals (the number of local variables
+used by the method), and code (returns an arrayref of instruction
+objects which have an op and args method).
 
 =head2 attributes
 

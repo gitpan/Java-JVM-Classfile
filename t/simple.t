@@ -6,7 +6,7 @@
 # change 'tests => 1' to 'tests => last_test_to_print';
 
 use strict;
-use Test::Simple tests => 27;
+use Test::Simple tests => 33;
 use lib 'lib';
 use Java::JVM::Classfile;
 ok(1); # If we made it this far, we're ok.
@@ -35,6 +35,17 @@ ok($method->descriptor eq '()V', "<init> descriptor");
 ok(scalar(@{$method->access_flags}) == 0, "<init> has no access flags");
 ok(scalar(@{$method->attributes}) == 1, "<init> has 1 attribute");
 ok($method->attributes->[0]->name eq 'Code', "<init> has Code attribute");
+my $code = $method->attributes->[0]->value;
+ok($code->max_stack == 1, "<init> has 1 max stack");
+ok($code->max_locals == 1, "<init> has 1 max locals");
+my $text;
+foreach my $instruction (@{$code->code}) {
+  $text .= "\t" . $instruction->op . "\t" . (join ", ", @{$instruction->args}) . "\n";
+}
+ok($text eq "	aload_0	
+	invokespecial	java/lang/Object, <init>, ()V
+	return	
+", "<init> contains good code");
 
 $method = $c->methods->[1];
 ok($method->name eq 'main', "main named");
@@ -44,10 +55,23 @@ ok(scalar(grep { $_ eq 'public' } @{$method->access_flags}) == 1, "main has acce
 ok(scalar(grep { $_ eq 'static' } @{$method->access_flags}) == 1, "main has access flags static");
 ok(scalar(@{$method->attributes}) == 1, "main has 1 attribute");
 ok($method->attributes->[0]->name eq 'Code', "main has Code attribute");
+$code = $method->attributes->[0]->value;
+ok($code->max_stack == 2, "main has 2 max stack");
+ok($code->max_locals == 1, "main has 1 max locals");
+$text = "";
+foreach my $instruction (@{$code->code}) {
+  $text .= "\t" . $instruction->op . "\t" . (join ", ", @{$instruction->args}) . "\n";
+}
+ok($text eq "	getstatic	java/lang/System, out, Ljava/io/PrintStream;
+	ldc	Hello, world!
+	invokevirtual	java/io/PrintStream, print, (Ljava/lang/String;)V
+	return	
+", "main contains good code");
 
 ok(scalar(@{$c->attributes}) == 1, "Right number of attributes");
 ok($c->attributes->[0]->name eq 'SourceFile', "SourceFile attribute present");
 ok($c->attributes->[0]->value eq 'HelloWorld.java', "SourceFile attribute value correct");
+
 
 exit;
 

@@ -162,18 +162,38 @@ METHODS
         Declared synchronized; invocation is wrapped in a monitor lock
 
     Various attributes are possible, the most common being the Code
-    attribute, where the value holds the Java bytecode for the method. At
-    this moment disassembling the bytecode is not currently possible, but it
-    is planned.
+    attribute, where the value holds information about the Java bytecode for
+    the method:
 
       foreach my $method (@{$c->methods}) {
         print "  " . $method->name . " " . $method->descriptor;
         print "\n    ";
         print "is " . join(", ", @{$method->access_flags});
         print "\n    ";
-        print "has attributes " . join(", ", map { $_->name } @{$method->attributes});
+        print "has attributes: ";
+        foreach my $att (@{$method->attributes}) {
+          my $name = $att->name;
+          my $value = $att->value;
+          if ($att->name eq 'Code') {
+            print "      $name: ";
+            print "stack(" . $value->max_stack . ")";
+            print ", locals(" . $value->max_locals . ")\n";
+            foreach my $instruction (@{$value->code}) {
+              print "\t" . $instruction->op . "\t" . (join ", ", @{$instruction->args}) . "\n";
+            }
+            print "\n";
+          } else {
+            print "      $name $value\n";
+          }
+        }
         print "\n";
       }
+
+    Note that in the case of the Code attribute, the value contains an
+    object which has three main methods: max_stack (the maximum depth of
+    stack needed by the method), max_locals (the number of local variables
+    used by the method), and code (returns an arrayref of instruction
+    objects which have an op and args method).
 
   attributes
 

@@ -20,8 +20,22 @@ foreach my $method (@{$c->methods}) {
   print "\n    ";
   print "is " . join(", ", @{$method->access_flags});
   print "\n    ";
-  print "has attributes " . join(", ", map { $_->name } @{$method->attributes});
-  print "\n";
+  print "has attributes:\n";
+  foreach my $att (@{$method->attributes}) {
+    my $name = $att->name;
+    my $value = $att->value;
+    if ($att->name eq 'Code') {
+      print "      $name: ";
+      print "stack(" . $value->max_stack . ")";
+      print ", locals(" . $value->max_locals . ")\n";
+      foreach my $instruction (@{$value->code}) {
+	print "\t" . $instruction->op . "\t" . (join ", ", @{$instruction->args}) . "\n";
+      }
+      print "\n";
+    } else {
+      print "      $name $value\n";
+    }
+  }
 }
 
 print "Attributes: " . scalar(@{$c->attributes}) . "\n";
