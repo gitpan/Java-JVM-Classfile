@@ -32,6 +32,25 @@ sub as_text {
   return $result;
 }
 
+# Field
+package Java::JVM::Classfile::Field;
+use Class::Struct;
+use overload '""' => \&as_text;
+struct(access_flags => '@',
+       name => '$',
+       descriptor => '$',
+       attributes => '$'); #'
+sub as_text {
+  my $self = shift;
+  my $result = "";
+  $result .= $self->name . " ";
+  $result .= $self->descriptor . " ";
+  $result .= "[" . join(", ", @{$self->access_flags}) . "] ";
+  $result .="= " . join(", ", @{$self->attributes}) . "] ";
+  return $result;
+}
+
+
 # Attribute
 package Java::JVM::Classfile::Attribute;
 use Class::Struct;
@@ -82,12 +101,12 @@ sub as_text {
   $result .= "Version: " . $self->version . "\n";
   $result .= "Class: " . $self->class . "\n";
   $result .= "Superclass: " . $self->superclass . "\n";
-  $result .= "Constant pool:\n" . $self->constant_pool;
+  $result .= "Constant pool:\n" . join(", ", @{$self->constant_pool}) . "\n";
   $result .= "Access flags: " . join(", ", @{$self->access_flags}) . "\n";
-  $result .= "Interfaces: " . $self->interfaces . "\n";
-  $result .= "Fields: " . $self->fields . "\n";
-  $result .= "Methods:\n" . $self->methods . "\n";
-  $result .= "Attributes:\n" . $self->attributes . "\n";
+  $result .= "Interfaces: " . join(", ", @{$self->interfaces} ) . "\n";
+  $result .= "Fields:\n" . join(",\n", @{$self->fields}) . "\n";
+  $result .= "Methods:\n" . join(",\n", @{$self->methods}) . "\n";
+  $result .= "Attributes:\n" . join(", ", @{$self->attributes}) . "\n";
   return $result;
 }
 
@@ -118,6 +137,18 @@ package Java::JVM::Classfile::LineNumber;
 use Class::Struct;
 struct(offset => '$',
        line => '$');
+
+package Java::JVM::Classfile::LocalVariable;
+use Class::Struct;
+struct(start_pc => '$', length => '$', name => '$', descriptor => '$', index => '$');
+
+package Java::JVM::Classfile::LocalVariableType;
+use Class::Struct;
+struct(start_pc => '$', length => '$', name => '$', signature => '$', index => '$');
+
+package Java::JVM::Classfile::Exception;
+use Class::Struct;
+struct(start_pc => '$', end_pc => '$', handler_pc => '$', catch_type => '$');
 
 
 # Classfile
@@ -180,7 +211,7 @@ my @ACCESS = (
     "public", "private", "protected", "static", "final", "synchronized",
     "volatile", "transient", "native", "interface", "abstract");
 
-$VERSION = '0.19';
+$VERSION = '0.20';
 
 use constant T_BOOLEAN => 4;
 use constant T_CHAR    => 5;
@@ -221,8 +252,8 @@ sub _parse {
   my $version = $self->read_version;
   my $constant_pool = $self->read_constant_pool;
   my($access_flags, $class, $superclass) = $self->read_class_info($constant_pool);
-  my $interfaces = $self->read_interfaces;
-  my $fields = $self->read_fields;
+  my $interfaces = $self->read_interfaces($constant_pool);
+  my $fields = $self->read_fields($constant_pool);
   my $methods = $self->read_methods($constant_pool);
   my $attributes = $self->read_attributes($constant_pool);
 
@@ -407,41 +438,88 @@ sub read_class_info {
     push @flags, $CLASSACCESS[$index] if substr($bits, $index, 1);
   }
 #  print "\n";
-  my $class_name_index = $self->read_u2;
-  my $class = $constant_pool->[$class_name_index];
-  die "Class name index doesn't point to class!" unless $class->type eq 'class';
-  my $class_name = $constant_pool->[$class->value];
-  die "Class name class doesn't point to string!" unless $class_name->type eq 'utf8';
-  my $myclass_name = $class_name->value;
+  my $myclass_name = $self->read_class_name($constant_pool, 'Class');
 
-  my $superclass_name_index = $self->read_u2;
-  $class = $constant_pool->[$superclass_name_index];
-  die "Superclass name index doesn't point to class!" unless $class->type eq 'class';
-  $class_name = $constant_pool->[$class->value];
-  die "Superclass name class doesn't point to string!" unless $class_name->type eq 'utf8';
-  my $superclass_name = $class_name->value;
+  my $superclass_name = $self->read_class_name($constant_pool, 'Superclass');
 
   return \@flags, $myclass_name, $superclass_name;
 #  print "Class is $class_name_index, super $superclass_name_index\n";
 }
 
 sub read_interfaces {
-  my $self = shift;
+  my ($self, $constant_pool) = @_;
 
   my $interfaces_count = $self->read_u2;
-  die "Interfaces not yet supported!" if $interfaces_count;
+  my @interfaces;
+  for my $ii (0 .. $interfaces_count-1) {
+    push @interfaces, $self->read_class_name($constant_pool, 'Interface');
+  }
 
-  return [];
+  return \@interfaces;
+}
+
+sub read_class_name {
+  my ($self, $constant_pool, $diagnostics) = @_;
+  return get_class_name($self->read_u2, $constant_pool, $diagnostics);
+}
+
+sub get_class_name {
+  my ($index, $constant_pool, $diagnostics) = @_;
+  my $class = $constant_pool->[$index];
+  die "$diagnostics name index doesn't point to class!" unless $class->type eq 'class';
+  my $class_name = $constant_pool->[$class->value];
+  die "$diagnostics name class doesn't point to string!" unless $class_name->type eq 'utf8';
+  return $class_name->value;
 }
 
 sub read_fields {
-  my $self = shift;
+  my ($self, $constant_pool) = @_;
 
   my $fields_count = $self->read_u2;
-  die "Interfaces not yet supported!" if $fields_count;
+  my @fields;
+  for my $fi (0 .. $fields_count-1) {
+    my @access_flags = $self->read_access_flags;
 
-  return [];
+    my $name = $self->read_name($constant_pool);
+    my $descriptor = $self->read_descriptor($constant_pool);
+    my $attributes = $self->read_attributes($constant_pool);
+
+    push @fields, Java::JVM::Classfile::Field->new(
+        name         => $name,
+        access_flags => \@access_flags,
+        descriptor   => $descriptor,
+        attributes   => $attributes
+    );
+  }
+  
+  return \@fields;
 }
+
+sub read_constant_string {
+  my ($self, $constant_pool, $diagnostics) = @_;
+  my $name_index = $self->read_u2; #name_index
+  my $name_struct = $constant_pool->[$name_index];
+  die "$diagnostics: index doesn't point to string" unless $name_struct->type eq 'utf8';
+  return $name_struct->value;
+}
+
+sub read_name { read_constant_string(@_, 'name');}
+
+sub read_descriptor { read_constant_string(@_, 'descriptor');}
+
+sub read_signature { read_constant_string(@_, 'signature');}
+
+sub read_access_flags {
+  my $self = shift;
+    my $access_flags = $self->read_u2;
+    my @access_flags;
+
+    my $bits = reverse unpack("B*", pack ("c*" ,$access_flags));
+    foreach my $index (0..length($bits)) {
+      push @access_flags, $METHODACCESS[$index] if substr($bits, $index, 1);
+    }
+    return @access_flags;
+  }
 
 sub read_methods {
   my($self, $constant_pool) = @_;
@@ -454,24 +532,9 @@ sub read_methods {
   foreach my $index (0..$method_count-1) {
 #    $methods[$_] = $self->read_u2;
 
-    my $access_flags = $self->read_u2;
-    my @access_flags;
-
-    my $bits = reverse unpack("B*", pack ("c*" ,$access_flags));
-    foreach my $index (0..length($bits)) {
-      push @access_flags, $METHODACCESS[$index] if substr($bits, $index, 1);
-    }
-
-    my $name_index = $self->read_u2;
-    my $name = $constant_pool->[$name_index];
-
-    die "name_index doesn't point to string" unless $name->type eq 'utf8';
-    $name = $name->value;
-    my $descriptor_index = $self->read_u2;
-    my $descriptor = $constant_pool->[$descriptor_index];
-    die "descriptor_index doesn't point to string" unless $descriptor->type eq 'utf8';
-    $descriptor = $descriptor->value;
-
+    my @access_flags = $self->read_access_flags;
+    my $name = $self->read_name($constant_pool);
+    my $descriptor = $self->read_descriptor($constant_pool);
     my $attributes = $self->read_attributes($constant_pool);
 
     push @methods, Java::JVM::Classfile::Method->new(
@@ -505,15 +568,24 @@ sub read_attributes {
       my $max_locals = $self->read_u2;
       my $code = $self->read_code($constant_pool);
       my $exception_table_length = $self->read_u2;
-      my $exception_table = [];
+      my @exception_table;
+      for (1 .. $exception_table_length) {
+        my $start_pc = $self->read_u2; 
+        my $end_pc = $self->read_u2;
+        my $handler_pc = $self->read_u2;
+        my $catch_type_index = $self->read_u2;
+        my $catch_type = $catch_type_index ? get_class_name($catch_type_index, $constant_pool, 'Exception') : "*";
+        push @exception_table, Java::JVM::Classfile::Exception->new(
+          start_pc=>$start_pc, end_pc=>$end_pc, handler_pc=>$handler_pc, catch_type=>$catch_type)
+      }
+      
       my $atts = $self->read_attributes($constant_pool);
-      die "Exceptions unsupported!" if $exception_table_length;
 
       $info = Java::JVM::Classfile::Attribute::Code->new(
         max_stack => $max_stack,
         max_locals => $max_locals,
         code => $code,
-        exception_table => $exception_table,
+        exception_table => \@exception_table,
         attributes => $atts,
       );
     } elsif ($attribute_name eq 'SourceFile') {
@@ -531,6 +603,36 @@ sub read_attributes {
 	push @lines, Java::JVM::Classfile::LineNumber->new(offset => $start_pc, line => $line_number);
       }
       $info = \@lines;
+    } elsif ($attribute_name eq 'LocalVariableTypeTable') {
+      my $local_variable_table_length = $self->read_u2;
+      my @local_variables;
+      for (1 .. $local_variable_table_length) {
+        my $start_pc = $self->read_u2;
+        my $length = $self->read_u2; #TODO validate
+        my $name = $self->read_name($constant_pool);
+        my $signature = $self->read_signature($constant_pool);
+        my $index = $self->read_u2;
+        push @local_variables, Java::JVM::Classfile::LocalVariableType->new(
+          start_pc=>$start_pc, 'length'=>$length, name=>$name, signature=>$signature, 'index'=>$index
+        );
+      }
+      $info = \@local_variables;
+    } elsif ($attribute_name eq 'LocalVariableTable') {
+      my $local_variable_table_length = $self->read_u2;
+      my @local_variables;
+      for (1 .. $local_variable_table_length) {
+        my $start_pc = $self->read_u2;
+        my $length = $self->read_u2; #TODO validate 
+        my $name = $self->read_name($constant_pool);
+        my $descriptor = $self->read_descriptor($constant_pool);
+        my $index = $self->read_u2;
+        push @local_variables, Java::JVM::Classfile::LocalVariable->new(
+          start_pc=>$start_pc, 'length'=>$length, name=>$name, descriptor=>$descriptor, 'index'=>$index
+        );
+      }
+      $info = \@local_variables;
+    } elsif ($attribute_name eq 'Signature') {
+      $info = $self->read_signature($constant_pool);
     } else {
       warn "unknown attribute $attribute_name!\n";
       # Fake it for now
@@ -649,6 +751,10 @@ sub get_index {
     push @operands, $constant_pool->[$constant_pool->[$constant->values->[0]]->values->[0]]->value;
     push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[0]]->value;
     push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[1]]->value;
+  } elsif ($type eq 'interfacemethodref') {
+    push @operands, $constant_pool->[$constant_pool->[$constant->values->[0]]->values->[0]]->value;
+    push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[0]]->value;
+    push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[1]]->value;
   } elsif ($type eq 'fieldref') {
     push @operands, $constant_pool->[$constant_pool->[$constant->values->[0]]->values->[0]]->value;
     push @operands, $constant_pool->[$constant_pool->[$constant->values->[1]]->values->[0]]->value;
@@ -658,6 +764,8 @@ sub get_index {
   } elsif ($type eq 'string') {
     push @operands, $constant_pool->[$constant->value]->value;
   } elsif ($type eq 'float') {
+    push @operands, $constant->value;
+  } elsif ($type eq 'integer') {
     push @operands, $constant->value;
   } else {
     die "unknown index type $type!\n";
@@ -828,14 +936,14 @@ Treat superclass methods specially when invoked by the invokespecial instruction
 =head2 interfaces
 
 This method returns an array reference of the interfaces defined in
-the classfile. Currently unimplemented:
+the classfile:
 
   my $interfaces = $c->interfaces;
 
 =head2 fields
 
 This method returns an array reference of the fields defined in
-the classfile. Currently unimplemented:
+the classfile:
 
   my $fields = $c->fields;
 
@@ -971,7 +1079,7 @@ Leon Brocard E<lt>F<acme@astray.com>E<gt>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2, Leon Brocard
+Copyright (C) 2001-7, Leon Brocard
 
 This module is free software; you can redistribute it or modify it
 under the same terms as Perl itself.

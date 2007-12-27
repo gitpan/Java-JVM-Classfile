@@ -1,4 +1,4 @@
-Changes
+CHANGES
 MANIFEST
 Makefile.PL
 README
@@ -8,6 +8,8 @@ examples/Ackermann.class
 examples/Ackermann.java
 examples/Bench.class
 examples/Bench.java
+examples/Features.class
+examples/Features.java
 examples/Fibo.class
 examples/Fibo.java
 examples/FloatMath.java
@@ -23,7 +25,9 @@ lib/Java/JVM/Classfile/Ops.pm
 lib/Java/JVM/Classfile/Perl.pm
 t/ackermann.t
 t/bench.t
+t/features.t
 t/fibo.t
 t/perl.t
 t/simple.t
 t/spin.t
+META.yml                                 Module meta-data (added by MakeMaker)

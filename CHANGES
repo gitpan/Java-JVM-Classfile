@@ -1,5 +1,9 @@
 Revision history for Perl module Java::JVM::Classfile
 
+0.29 Thu Dec 27 21:26:47 CET 2007
+    - implement interfaces and fields with new features class and
+      test (patches by Vadim Beilin)
+
 0.19 Sun May 19 18:33:15 BST 2002
 	- new perl.t test which generates Perl code from the example
           class files, runs them, and compares them with the expected
